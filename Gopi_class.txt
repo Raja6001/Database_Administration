@@ -1,0 +1,1468 @@
+MySQL Beginner Class:
+*********************
+Trainer	: RAJAKUMAR J 
+Date	: 20-Apr-2023
+Modified: 11-09-2023
+
+MySQL SYLLABUS:
+1) Introduction about MySQL
+2) How to install MySQL 5.7 specific version and load time zone details
+3) Create database and Table
+4) MySQL Binary Installation:
+5) How to import sample database into MySQL server in Linux
+6) DDL - Data Definition Language CREATE, ALTER, DROP, TRUNCATE
+
+	Database & Table creation
+	DDL - 
+	DML - Data Manipulation Language SELECT, INSERT, UPDATE, DELETE
+	DCL - Data Control Language GRANT, REVOKE
+	TCL - Transaction Control Language COMMIT, ROLLBACK, SAVEPOINT
+
+
+vi command:
+{
+Insert mode
+o		- Insert new line below currsor with insert mode.
+shift+O	- Insert new line before currsor with insert mode.
+shift+A	- Insert mode end of the line.
+i		- Commonly used for insert mode.
+shift+S - Cut the current line and entering to insert mode.
+	
+Command mode:
+Esc		- Come to command mode from insert mode.
+:1 		- Jump to first line.
+gg		- Jump to first line.
+shift+g	- Jump to last line.
+:$		- Jump to last line.
+:10		- Jump to 10th line.
+u		- yy the changes.
+ctrl+r	- Redo the changes.
+yy 		- Copy the current line.
+3yy 	- 3 lines copied from the currsor (3 is your choise change how many line to copy Ex: 10yy means 10 line copied).
+y$ 		- Copy everything from the cursor to the end of the line.
+y^ 		- Copy everything from the cursor to the start of the line.
+yw 		- Copy to the start of the next word.
+3yw 	- Copy to the start of the cursor next three word.
+y% 		- Copy to the  character inside pairs are (), {}, and []. Useful to copy text between matching brackets.
+p		- Paste the copied line(s) below currsor.
+shift+P	- Paste the copied lines(s) above currsor.
+gg d G	- Delete all lines.
+:%d			- Delete all lines.
+:set nu 	- Set the number for all lines.
+:g/^\s*$/d	- Remove all whitespace lines.
+:g/^$/d 	- Remove empty lines.
+:%s/find/replace/global
+:%s/find/replace/
+
+Exit mode:
+:w 		- Save the file.
+:wq		- Save the file and quite.
+:q	 	- Quite the file without saving.
+:wq!	- Save the file and quite without asking any question. 
+
+
+edit file in linux
+vi
+vi editor in linux tutorial
+vi editor tips
+
+}
+
+
+1) Introduction about MySQL:
+{	
+What is data?
+	Data is a collection of information like Audio, Image, Video, Text, etc...
+	We are using like text in MySQL.
+	Datas are stored in tables.
+	Tables are stored in Database.
+	
+How to use MySQL?
+	You need a MySQL server system and MySQL client.
+	Windows users need MySQL Workbench.
+	Linux users can work on command line.
+	
+What is database?
+	Collaction of tables stored called database.
+}
+
+2) How to install MySQL 5.7 specific version and load time zone details
+{
+It is need sudo user:
+sudo -i
+
+Update your server if not done before:
+yum update -y
+
+Check mariadb-libs to uninstall
+yum list installed |  grep mariadb
+
+Remove mariadb-libs commands:
+yum remove mariadb* -y
+
+Check the Selinux status :
+sestatus
+
+To change the Selinux mode:
+setenforce 0
+
+Disable Selinux in the config file:
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+
+Must reboot your server after change the Selinux configuration:
+reboot
+
+Find the OS version:
+sudo cat /etc/redhat-release
+
+Using YUM repositories. You can find here repo https://dev.mysql.com/downloads/repo/yum/
+
+Installing repositories using YUM
+sudo yum localinstall https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm -y
+
+Installing mysql server
+rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+sudo yum repolist enabled | grep 'mysql'
+sudo yum repolist all | grep mysql5 
+
+Latest version of MySQL 5.7 installation:
+sudo yum install  mysql-community-server -y
+
+What are the tools available in MySQL specific version
+repoquery --show-duplicate mysql-community-*5.7.40*64
+
+yum install mysql-community-*5.7.40*64
+
+To verify installed mysql
+rpm -qa | grep -i mysql-community
+
+Start the MySQL Service
+sudo systemctl start mysqld 
+sudo service mysql start
+sudo /etc/init.d/mysql start
+
+Check the MySQL running status:
+sudo systemctl status mysqld 
+
+Get the temporary password from mysqld.log file
+grep 'A temporary password' /var/log/mysqld.log | tail -n 1
+
+Start the secure installation
+mysql_secure_installation
+
+Import the time_zone tables:
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -uroot -pAdmin@123 mysql
+
+}
+
+3) How to create database, tables and insert data?
+{
+Login into MySQL:
+mysql -uroot -pAdmin@123 -A
+	
+Create database syntax is:
+**************************	
+CREATE DATABASE database_name;
+
+	CREATE DATABASE demo;
+	CREATE DATABASE IF NOT EXISTS demo;
+	DROP DATABASE IF EXISTS demo;
+	
+To view all the database:
+	SHOW DATABASES;
+	
+Which database going to work first you need to use it
+	USE demo;
+
+How to find currently working database?
+	SELECT DATABASE();
+	SELECT CONNECTION_ID();
+	
+How to CREATE table in database?
+CREATE:
+******
+CREATE DATABASE demo; 	-- It should through error bcz already db created with same name
+USE demo;
+
+SAMPLE TABLE:
+	CREATE TABLE demo_table (
+	id INT(10),
+	first_name VARCHAR(200),
+	age INT(5),
+	PRIMARY KEY (id)
+	);
+
+Describe table in detailed manar:
+SHOW CREATE TABLE demo_table\G
+
+Describe table:
+desc table_name;
+desc demo_table;
+
+INSERT INTO demo_table (id,first_name,age) VALUES (1, 'test',20);
+INSERT INTO demo_table (id,first_name,age) VALUES (2, 'Ravi',30);
+INSERT INTO demo_table (id,first_name ) VALUES (3, 'Ramu');
+INSERT INTO demo_table VALUES (4, 'Bala',20);
+INSERT INTO demo_table VALUES (4, 'test',20);  -- It should show error duplicate id
+INSERT INTO demo_table VALUES (5, 'test',20);
+
+SELECT * FROM demo_table;
+}
+
+4) MySQL Binary Installation:
+{
+https://www.ktexperts.com/installation-of-mysql-8-0-21-on-rhel-using-generic-binaries-in-aws-cloud/
+
+I am using AWS EC2 instance with CentOS 7:
+
+Binary installation of MySQL 8.0 with ssl connection:
+
+It is need sudo user:
+sudo -i
+
+Update your server if not done before:
+yum update -y
+
+Check mariadb-libs to uninstall
+yum list installed |  grep mariadb
+
+Remove mariadb-libs commands:
+yum remove mariadb* -y
+
+Check the Selinux status :
+sestatus
+
+To change the Selinux mode:
+setenforce 0
+
+Disable Selinux in the config file:
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+
+Must reboot your server after change the Selinux configuration:
+reboot
+
+Install needed softwere:
+yum install wget -y
+
+Download MySQL Distribution (Tar) Go to MySQL Community Downloads and click on MySQL Community Server.
+https://downloads.mysql.com/archives/community/
+Click on Archives
+Select TAR file and copy the link address by giving the right click.
+
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.0.32-el7-x86_64.tar.gz
+tar -xvf mysql-8.0.32-el7-x86_64.tar.gz
+ll
+
+cp -r mysql-8.0.32-el7-x86_64 /usr/local/
+cd /usr/local/
+
+Install all in one library:
+yum install libaio -y
+
+MySQL user and in the group
+groupadd mysql
+tail -5  /etc/group
+
+Create user for MySQL without shell access
+useradd -r -g mysql -s /bin/false mysql
+tail -5  /etc/passwd
+
+Link the directory with mysql
+ls -ltrh
+
+ln -s mysql-8.0.32-el7-x86_64 mysql
+
+Create the data directory and support-files  
+cd mysql
+mkdir mysql-files data
+
+chown mysql:mysql mysql-files
+chmod 750 mysql-files
+ll
+
+vi /etc/my.cnf
+[mysqld]
+basedir=/usr/local/mysql
+datadir=/usr/local/mysql/data
+user=mysql
+
+Initialize the data directory:
+cd /usr/local/mysql
+bin/mysqld --initialize --user=mysql
+
+To start the MySQL
+bin/mysqld_safe --user=mysql &		# Then hit enter
+
+Start the secure installation:
+bin/mysql_secure_installation
+bin/mysql -u root -p
+select @@version;
+\s
+exit
+
+Verify the ssl connection before configure:
+mysql -u root -p --ssl-mode=required 
+\s 
+exit
+
+Run the script for ssl connection:
+bin/mysql_ssl_rsa_setup
+
+Verify the ssl connection:
+mysql -u root -p --ssl-mode=required 
+\s 
+exit
+
+Copy the MySQL files:
+cp support-files/mysql.server /etc/init.d/mysql.server
+
+/etc/init.d/mysql.server stop
+/etc/init.d/mysql.server status
+/etc/init.d/mysql.server start
+
+Add the path for MySQL binary installation all users
+# insert line before "export PATH"
+vi .bash_profile
+PATH=$PATH:/usr/local/mysql/bin
+
+mysql -V
+
+# Only for shell 
+export PATH=$PATH:/usr/local/mysql/bin
+
+# or you can start stop and check the status from this path also.
+/usr/local/mysql/support-files/mysql.server stop / status / start	
+
+}
+5) How to import sample database into MySQL server in Linux
+{
+Install wget for downloading content and unzip for extract the zip file.
+yum install wget unzip -y
+wget 'https://codeload.github.com/datacharmer/test_db/zip/master' -O master.zip
+unzip master.zip
+cd test_db-master
+mysql -uroot -pAdmin@123 -f < employees.sql
+
+
+mysqldump -uroot -pAdmin@123 employees first_table --single-transaction --verbose > test.sql
+
+=================================
+FULL DB DUMP WITH PROCEDURE
+=================================
+mysqldump -uroot -pAdmin@123 -R employees > employees.sql
+
+=================================
+FULL DB DUMP WITH PROCEDURE GZIP FORMAT
+=================================
+mysqldump -uroot -pAdmin@123 -R demo | gzip > /tmp/DB_DUMP_GZIP.sql.gz
+
+=================================
+ONE TABLE ONLY DUMP
+=================================
+mysqldump -uroot -pAdmin@123 demo TABLE_NAME_1 > /tmp/one_table_dump.sql
+
+=================================
+MULTIPLE TABLE ONLY DUMP
+=================================
+mysqldump -uroot -pAdmin@123 demo TABLE_NAME_1 TABLE_NAME_2 TABLE_NAME_3 > /tmp/3table_dump.sql
+
+=================================
+PROCEDURE DUMP QUERY
+=================================
+mysqldump -uroot -pAdmin@123 -n -t -d -R demo > /tmp/proc.sql
+mysqldump  -n -t -d -R --triggers DNATAKSAT > DNATAKSAT.porc.sql
+
+
+===================================
+EVENT DUMP QUERY
+===================================
+mysqldump -uroot -pAdmin@123 demo --no-data --no-create-db --no-create-info --triggers --events --skip-opt --lock-tables > /tmp/event.sql
+
+===================================
+EVENT,PROCEDURE,DATA, DUMP QUERY -with position (slave setup)
+===================================
+mysqldump -uroot -pAdmin@123 --databases databasename --triggers --routines --events --single-transaction --master-data=2 | gzip > databasename.sql.gz
+
+===================================
+RESTORE COMMAND: single table from Full dump file - *** First create table struture then start the process 
+****************
+zgrep ^"INSERT INTO \`TABLE_name" demo.sql.gz | mysql -uroot -p demo
+
+===================================
+Nohup restore command :
+***************************
+nohup gunzip < /root/demo.sql.gz | mysql -u root -pAdmin@123  test
+
+===================================
+DUMP TABLE STRUTURE from DUMP FILE:
+********************
+perl -ne 'print if /CREATE TABLE/../ENGINE=InnoDB/' test.sql > OUTPUT_FILE.sql
+perl -ne 'print if /starting_word/../ending_word/' filename > output_filename
+===================================
+NO DATA:
+*********
+mysqldump --no-data -h localhost -u test -pAdmin@123 test > mydatabase_backup.sql
+
+===================================
+
+}
+
+
+
+User creation:
+vi /etc/my.cnf
+default-authentication-plugin=mysql_native_password
+
+
+Import sample database:
+yum install wget unzip -y
+wget 'https://codeload.github.com/datacharmer/test_db/zip/master' -O master.zip
+unzip master.zip
+cd test_db-master
+mysql -uroot -pAdmin@123 -f < employees.sql
+mysql -uroot -pAdmin@123 employees < employees.sql
+
+
+wget && chmod +x 
+
+
+
+
+
+vi backup_script.sh
+#!/bin/bash
+#
+# Backup script
+#
+# Date: 29-Sep-2023
+#
+backup_dir=/root/MySQL_Backup
+
+
+
+
+
+
+
+
+5) DDL - Data Definition Language CREATE, ALTER, DROP, TRUNCATE
+[  ************************************************************
+Date	: 12-sep-2023
+
+
+mysql -uroot -pAdmin@123 
+
+DROP DATABASE IF EXISTS demo;
+CREATE DATABASE IF NOT EXISTS demo;
+SHOW DATABASES;
+SHOW DATABASES like 'emp%';
+USE demo;
+SHOW TABLES;
+SHOW TABLES LIKE 'sala%';
+SHOW TABLES FROM employees;
+SHOW TABLES FROM employees LIKE 'dept%';
+
+CREATE
+******
+
+USE employees;
+Normal table:	
+CREATE TABLE users (
+ID int NOT NULL  AUTO_INCREMENT,
+fname VARCHAR(255) NOT NULL,
+lname VARCHAR(255),
+address VARCHAR(255),
+city VARCHAR(255) default null,
+state VARCHAR(255) default null,
+county VARCHAR(255) default null,
+post VARCHAR(255) default null,
+phone1 VARCHAR(255) default null,
+email VARCHAR(255) default null,
+web VARCHAR(255) default null,
+Age int(10),
+Salary bigint(20) default 0,
+pf_amount decimal(10,2) default '0.00',
+PRIMARY KEY (ID)
+);
+SHOW CREATE TABLE users\G
+
+CREATE TABLE IF NOT EXISTS first_table (
+    id INT(10) NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(200) NOT NULL,
+    last_name VARCHAR(200),
+    age TINYINT(3) UNSIGNED,
+    dob DATE,
+    doj DATE,
+    mobile BIGINT(20) UNSIGNED UNIQUE,
+    salary DECIMAL(10,2) DEFAULT '0.00',
+    city VARCHAR(255) DEFAULT NULL,
+    reg_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+    PRIMARY KEY (id)
+);
+
+
+SHOW CREATE TABLE first_table\G
+DESC first_table;
+
+
+INSERT INTO first_table (id, first_name, last_name, age, dob, doj, mobile, salary, city) VALUES (1, 'test', 'Kumar', 40, '1990-04-23', '2023-05-10', 8190926001, 150000.50, 'Thoothukudi');
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('siva', 'Kumar', 20, '2003-04-23', '2023-05-10', 95246183458, 150000.80, 'Tirunelveli');
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('Anu', 'radha', 27, '2003-04-23', '2023-05-10', 95246183458, 150000.80, 'Covai'); -- it should come err mobile column is unique and change mobie no
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('Manoj', 'Kumar', 20, '2003-04-23', '2023-05-10', 9524654831, 150000.80, 'Tirunelveli');
+SELECT * FROM first_table;
+SELECT * FROM first_table LIMIT 2;
+show table status
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('Robin','son', '27','2003-04-23','2022-05-10',8122754695,'152800','Brazil');
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('kumar','siva', '27','2003-04-23','2022-05-10',9842754695,'152800','Brazil');
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('priya','Anu','27','2003-04-23','2022-05-10',7584754695,'152800','Brazil');
+INSERT INTO first_table (first_name, last_name, age, dob, doj, mobile, salary, city) VALUES ('Test','user','27','2003-04-23','2022-05-10',6347754695,'152800','Brazil');
+INSERT INTO first_table(first_name,Age,mobile) values ('Test','27','9645323800');
+INSERT INTO first_table(first_name,salary) values ('sample','323800');  
+INSERT INTO first_table(last_name,Age,salary) values ('new name','27','323800'); -- it should not work bcz first name is not null
+SELECT * FROM first_table;
+TRUNCATE TABLE first_table;
+
+EXPLAIN SELECT * FROM first_table;
+SELECT * FROM first_table where id in (select emp_no from employees) ;
+ALTER TABLE first_table AUTO_INCREMENT=10001;
+EXPLAIN SELECT * FROM first_table where id in (select emp_no from employees) ;
+
+
+VIEW:
+*****
+CREATE VIEW IF NOT EXISTS first_table_view AS SELECT first_name, last_name, age, city FROM first_table WHERE city = 'Brazil' and age=27;  
+(Note: VIEW NAME first_table_view it is WORKS LIKE A TABLE  u can use select * from first_table_view; the same result of first_table)
+SELECT * FROM first_table_view;
+
+Alter :
+*******
+ALTER TABLE first_table ADD COLUMN  Email varchar(255);
+SELECT * FROM first_table LIMIT 2;
+ALTER TABLE first_table ADD COLUMN  date_of_birth datetime AFTER city ;
+SELECT * FROM first_table LIMIT 2;
+ALTER TABLE first_table DROP COLUMN  Email;
+SELECT * FROM first_table LIMIT 2;
+ALTER TABLE first_table CHANGE COLUMN  last_name Nick_Name  varchar(255) ;
+SELECT * FROM first_table LIMIT 2;
+ALTER TABLE  first_table MODIFY COLUMN Nick_Name text DEFAULT NULL;
+SHOW CREATE TABLE first_table\G
+ALTER TABLE first_table CHANGE COLUMN Nick_Name last_name varchar(255) ;
+
+USER
+****
+SELECT USER, HOST, PLUGIN, AUTHENTICATION_STRING FROM mysql.user;
+CREATE USER 'test'@'localhost' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'Test@123';
+GRANT ALL PRIVILEGES ON demo.* TO 'test'@'localhost'; 
+GRANT ALL PRIVILEGES ON demo.* TO 'test'@'localhost'; 
+REVOKE ALL PRIVILEGES ON demo.* FROM 'test'@'localhost';
+GRANT SHOW_ROUTINE, ALTER ROUTINE ON *.* TO 'ssgdw_prod'@'%';
+GRANT SUPER, SYSTEM_USER ON *.* TO 'ssgdw_prod'@'%';
+SHOW GRANTS FOR 'test'@'localhost';
+DROP USER 'test'@'localhost';
+FLUSH PRIVILEGES;
+
+
+
+Additional:
+************
+SHOW CREATE TABLE table_name\G
+CREATE TABLE second_table LIKE first_table; 		-- stracture ONLY
+INSERT INTO second_table SELECT * FROM first_table;	-- before need to create first_table stracture
+CREATE TABLE third_table SELECT * FROM first_table;	-- it create new table like first_table
+
+
+Truncate:(format)
+*********
+TRUNCATE TABLE demo_table;
+(Note: Delete table gives it will create fragment on database)
+
+Rename:
+*******
+RENAME TABLE demo_table TO sample_table;
+
+Comment:
+********
+ALTER TABLE sample_table ADD COLUMN `mobile` bigint(15)  COMMENT 'This is my mother number.';
+SHOW CREATE TABLE sample_table\G
+
+
+
+Drop:
+*****
+SHOW DATABASES;
+DROP DATABASE IF EXISTS  demo;
+DROP TABLE IF EXISTS demo.sample_table;
+DROP PROCEDURE procedurename;
+DROP USER 'test'@'localhost';
+
+CREATE TABLE IF NOT EXISTS first_table (
+    id INT(10) NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(200) NOT NULL,
+    last_name VARCHAR(200),
+    age TINYINT(3) UNSIGNED,
+    dob DATE,
+    doj DATE DEFAULT (CURRENT_DATE),
+    mobile BIGINT(20) UNSIGNED UNIQUE,
+    salary DECIMAL(10,2) DEFAULT '0.00',
+    city VARCHAR(255) DEFAULT NULL,
+    reg_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+    PRIMARY KEY (id)
+);
+=================================
+LINUX CMDS
+cat filename		- To view the file without open 
+touch filename		- To create new empty file
+vi filename 		- To create new  file and insert data and need to save a file 
+:wq!				- To save a file
+nano filename 		- Nano is a file editor		 
+less filename		- To view a file line by line
+head filename		- To view a file top 10 line
+tail filename		- To view a file buttom 10 line
+mkdir Folder_Name	- To create a new Directory or Folder
+cd Folder_Name		- To change the directory
+pwd 				- To find/verify the current working directory
+
+=================================
+
+
+pidof mysqld | xargs kill -9 
+=================================
+DML:
+***
+USE demo;
+SHOW TABLES;
+
+SELECT * FROM departments ORDER BY dept_no;
+SELECT dept_name FROM departments ORDER BY dept_no;
+SELECT COUNT(*) FROM demo;
+SELECT * FROM demo  LIMIT 1;
+SELECT * FROM demo ORDER BY emp_no desc LIMIT 4,1;
+SHOW CREATE TABLE demo\G
+CREATE TABLE IF NOT EXISTS staff SELECT * FROM demo;
+
+
+
+
+
+MySQL 5.7 to 8.0
+systemctl stop mysqld
+
+To verify installed mysql
+rpm -qa | grep -i mysql
+ 
+Backup the datadirectory:
+cp -r mysql /tmp/
+
+Remove MySQL all in one CMDS
+yum remove mysql* -y
+
+again verify
+rpm -qa | grep -i mysql
+
+---- 
+This is option
+Enable / disable repo
+sudo yum-config-manager --disable mysql57-community
+sudo yum-config-manager --enable mysql80-community
+---
+Find the OS version:
+sudo cat /etc/redhat-releaseFind the OS version:
+sudo cat /etc/redhat-release
+
+Install MySQL 8.0 repo
+You can find the YUM repositories here: https://dev.mysql.com/downloads/repo/yum/
+
+yum localinstall https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm -y
+
+Installing mysql server
+rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+Verify that mysql80-community is enabled with detailed:
+sudo yum repolist all | grep mysql8
+
+Check the specific version of MySQL
+repoquery --show-duplicate mysql-community*8.0.28*64
+
+Install the specific version:
+yum install mysql-community*8.0.28*64 -y
+
+
+
+
+
+
+
+
+
+sudo rpm -i mysql-community-{server-8,client,common,libs}*
+
+read -n 6 -p " Enter 6 characters only: "
+read -s -p "Enter password: " 
+
+
+
+Remove default mariadb lib
+yum remove mariadb*
+
+Installing mysql server
+rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+sudo yum install  mysql-community-server
+
+To verify installed mysql
+ rpm -qa | grep -i mysql-community
+
+sudo service mysql start
+sudo /etc/init.d/mysql start
+
+
+
+sudo rpm -i mysql-community-{server-8,client,common,libs}*
+
+
+
+
+
+CREATE TABLE titles_only AS SELECT DISTINCT title FROM titles;
+INSERT INTO titles_only SELECT DISTINCT title FROM titles;
+To avoid duplicates, you can use INSERT IGNORE
+
+SELECT first_name, last_name INTO OUTFILE 'result.csv'
+ FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+ LINES TERMINATED BY '\n'
+ FROM demo WHERE hire_date<'1986-01-01' LIMIT 10;
+
+
+PASSWORD EXPIRE INTERVAL 90 DAY;
+
+
+ mysql_config_editor set --login-path=mysql821 --host=mysql821.cvckazjyov7v.eu-west-1.rds.amazonaws.com --user=mysqldba --password
+
+ mysql_config_editor set --login-path=travmysql8 --host=travmysql8.cvckazjyov7v.eu-west-1.rds.amazonaws.com --user=root --password --port=5076
+mysql_config_editor remove --login-path=travmysql8
+
+
+
+INDEX:
+*****
+SHOW TABLES;
+SHOW CREATE TABLE first_table\G
+CREATE INDEX idx_first_name ON first_table (first_name);
+SHOW CREATE TABLE first_table\G
+ALTER TABLE `first_table` ADD INDEX `Com_inx_3_col` (doj, mobile, salary);
+CREATE INDEX Com_ind_name ON first_table (first_name,age,salary);		
+(Note: 16 columns add index, 64 index can create per table)
+SHOW CREATE TABLE first_table\G
+
+SHOW PROCESSLIST;
+SELECT * FROM staff where birth_date='1958-10-31' and gender='M';
+SHOW CREATE TABLE staff\G
+CREATE INDEX Com_ind_dob_gender ON staff (birth_date,gender);
+SELECT * FROM staff where birth_date='1958-10-31' and gender='M';
+
+
+
+
+##########################################################################
+
+
+mysql> SET @n = 0;
+mysql> SELECT @n := @n+1 AS rownum, thing, arms, legs FROM limbs;
+mysql> SHOW FULL COLUMNS FROM limbs;
+ SELECT COUNT(DISTINCT srcuser) FROM mail;
+SELECT thing, UPPER(thing), LOWER(thing) FROM limbs;
+
+
+SET @n = 0;
+mysql> SELECT @n := @n+1 AS rownum, thing, arms, legs FROM limbs;
+SELECT CURDATE(), CURTIME(), NOW();
+
+SELECT CURDATE(), YEAR(CURDATE()) AS year,
+MONTH(CURDATE()) AS month, MONTHNAME(CURDATE()) AS monthname,
+DAYOFMONTH(CURDATE()) AS day, DAYNAME(CURDATE()) AS dayname;
+
+SELECT NOW(), HOUR(NOW()) AS hour,  MINUTE(NOW()) AS minute, SECOND(NOW()) AS second;
+
+l> SELECT t1, t2,
+ -> TIMEDIFF(t2,t1) AS 't2 - t1 as TIME',
+ -> IF(TIMEDIFF(t2,t1) >= 0,'+','-') AS sign,
+ -> HOUR(TIMEDIFF(t2,t1)) AS hour,
+ -> MINUTE(TIMEDIFF(t2,t1)) AS minute,
+ -> SECOND(TIMEDIFF(t2,t1)) AS second
+ -> FROM time_val;
++----------+----------+
+
+mysql> \T tmp.out
+Logging to file 'tmp.out'
+mysql> \t
+Outfile disabled.
+
+
+[Service]
+LimitNOFILE=max_open_files
+PIDFile=/path/to/pid/file
+LimitCore=core_file_limit
+Environment="LD_PRELOAD=/path/to/malloc/library"
+Environment="TZ=time_zone_setting"
+
+
+ sudo mysqlbinlog /data/mysql/binlogs/server1.000001 | mysql -f -h <remote_host> -u <username> -p
+
+sudo mysqlbinlog /data/mysql/binlogs/server1.000001 > server1.binlog_extract
+ cat server1.binlog_extract | mysql -h <remote_host> -u <username> -p
+
+sudo mysqlbinlog /data/mysql/binlogs/server1.000001 --startdatetime="2017-08-19 00:00:01" --stop-datetime="2017-08-19 12:17:00" >
+binlog_extract
+
+ sudo mysqlbinlog /data/mysql/binlogs/server1.000001 --startposition=471 --stop-position=1793 > binlog_extract
+
+sudo mysqlbinlog /data/mysql/binlogs/server1.000001 --
+database=demo > binlog_extract
+
+SHOW BINLOG EVENTS IN 'server1.000008' LIMIT 10;
+
+Ignore tables
+ mysqldump --databases demo --ignore-table=demo.salary > demo_backup.sql
+
+
+mysqldump --databases demo --tables demo --databases
+demo --tables demo --where="hire_date>'2000-01-01'" >
+demo_after_2000.sql
+
+mysqldump --databases demo --tables demo --databases
+demo --tables demo --where="hire_date >= '2000-01-01' LIMIT 10" >
+demo_after_2000_limit_10.sql
+
+Only schema and no data
+mysqldump --all-databases --routines --events --triggers --no-data >
+schema.sql
+
+
+Only data and no schema
+mysqldump --all-databases --no-create-db --no-create-info --completeinsert > data.sql
+
+
+
+
+
+backup script
+
+#!/bin/bash
+
+export PATH="/bin:/usr/local/mysql8.0/bin:/usr/local/mysql8.0/bin:$PATH"
+
+# MySQL connection details
+threshold_seconds=1000
+
+# Array of MySQL hosts
+hosts=("localhost")
+email_id="visubalan@infodynamic.in,shaik.m@infodynamic.in"
+
+
+# Iterate over each host
+for host in "${hosts[@]}"; do
+
+    output_file="/u01/MySQL_Monitor/long-running-$host.log"
+    echo "$(date)" > $output_file
+    echo "Checking MySQL on host: $host" >> $output_file
+
+    query="SELECT id, user, host, db, command, time, state, info FROM information_schema.processlist WHERE user != 'event_scheduler' AND command != 'Sleep' AND time > $threshold_seconds ORDER BY tim
+e DESC \G;"
+
+    mysql --login-path="$host" --execute="$query" >> "$output_file" 2>&1
+    # Check if MySQL connection failed
+    if [ $? -ne 0 ]; then
+        cat "$output_file" | mail -s "MySQL Connection Failed on Host: $host" $email_id
+    else
+        if [ -z "$output_file" ]; then
+            cat "$output_file" | mail -s "Long-running queries on MySQL Host: $host" $email_id
+            echo "Email sent for $host"
+        else
+            echo "No long-running queries found for MySQL Host: $host."
+        fi
+    fi
+
+    echo "--------------------------------------"
+done
+
+exit 0
+
+
+
+#!/bin/bash
+#
+# Backup all MySQL Databases in this instance
+#
+# Last Modified: Apr-10-2023
+#
+export PATH="/bin:/usr/local/mysql/bin:$PATH"
+
+# directory to put the backup files
+BACKUP_DIR=/u02/mysql_backup
+
+# MYSQL Parameters
+#MYSQL_UNAME='dba'
+TODAY=`date +"%d%b%Y"`
+
+# Don't backup databases with these names
+# Example: starts with mysql (^mysql) or ends with _schema (_schema$)
+IGNORE_DB="(mysql|information_schema|performance_schema|sys)"
+
+# Number of days to keep backups
+KEEP_BACKUPS_FOR=8  #days
+
+#Empty log file before starting
+cp /dev/null /tmp/backupError.log
+#==============================================================================
+# METHODS
+#==============================================================================
+
+# YYYY-MM-DD
+TIMESTAMP=$(date +%F)
+
+function delete_old_backups()
+{
+#set -x
+  echo "Deleting $BACKUP_DIR/* older than $KEEP_BACKUPS_FOR days"
+#  find $BACKUP_DIR/* -mtime +$KEEP_BACKUPS_FOR -exec rm -rf {} \;
+cd $BACKUP_DIR
+ls -t | tail -n +$KEEP_BACKUPS_FOR | xargs rm -rf --
+ if [ $? -ne 0 ]; then
+        echo "Error Deleting Old Backups" >> /tmp/backupError.log
+   fi
+}
+
+#function mysql_login() {
+#  local mysql_login="-u $MYSQL_UNAME"
+#  echo $mysql_login
+#}
+
+function database_list() {
+  local show_databases_sql="SHOW DATABASES WHERE \`Database\` NOT REGEXP '$IGNORE_DB'"
+  echo $(mysql --login-path=backup -e "$show_databases_sql"|awk -F " " '{if (NR!=1) print $1}')
+  if [ $? -ne 0 ]; then
+        echo "Error running show databases" >> /tmp/backupError.log
+  fi
+
+}
+
+function echo_status(){
+  printf '\r';
+  printf ' %0.s' {0..100}
+  printf '\r';
+  printf "$1"'\r'
+}
+
+function backup_database(){
+    mkdir -p ${BACKUP_DIR}/${TODAY}
+    backup_file="$BACKUP_DIR/${TODAY}/$TIMESTAMP.$database.sql.gz"
+    output+="$database => $backup_file\n"
+    echo_status "...backing up $count of $total databases: $database"
+    $(mysqldump --login-path=backup --opt --quick --single-transaction --routines --triggers --events --force $database | gzip -c > $backup_file)
+#    
+    if [ $? -ne 0 ]; then
+        echo "Error running mysqldump for $database" >> /tmp/backupError.log
+	else
+	echo "$database database dump completed at `date +%Y%m%d_%T`"
+    fi
+}
+
+function backup_databases(){
+  local databases=$(database_list)
+  local total=$(echo $databases | wc -w | xargs)
+  local output=""
+  local count=1
+  for database in $databases; do
+    backup_database
+    local count=$((count+1))
+  done
+  echo -ne $output | column -t
+}
+
+function hr(){
+  printf '=%.0s' {1..100}
+  printf "\n"
+}
+
+#==============================================================================
+# RUN SCRIPT
+#==============================================================================
+delete_old_backups
+hr
+backup_databases
+hr
+if [ -s /tmp/backupError.log ]; then
+   cat /tmp/backupError.log | mail -s "Error running backup on `hostname`" visubalan@infodynamic.in,shaik.m@infodynamic.in
+   exit 1
+else
+   echo "All backed up!\n\n"
+fi
+
+
+
+
+}
+}
+
+
+
+
+
+
+
+
+DDL -data definition language
+*****************************
+
+Create
+******
+Create database databasename;
+
+
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('pradeep','siva','27','60000','2800','Brazil');
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('kumar','siva','27','60000','2800','Brazil');
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('kumar','Raj','27','60000','2800','noida');
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('radha','Anu','27','60500','3800','noida');
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('priya','Anu','27','60500','3800','brazil');
+
+insert into first_table(LastName,FirstName,Age,Salary,pf_amount,city) values ('Test','user','27','60500','3800','brazil');
+
+
+insert into first_table(LastName,Age,pf_amount) values ('Test','27','3800');
+
+insert into collection(Age,pf_amount) values ('27','3800');
+
+
+CREATE USER 'siva_demo'@'localhost' IDENTIFIED BY 'Test@123';
+
+
+CREATE INDEX idx_lastname ON first_table (LastName);
+
+CREATE INDEX Com_ind_name ON first_table (LastName,city,salary);
+
+CREATE VIEW business_table_view_ AS SELECT FirstName, city FROM first_table WHERE city = 'Brazil' and age=27;
+
+
+Alter :
+*******
+
+ALTER TABLE first_table ADD column  Email varchar(255);
+
+ALTER TABLE first_table ADD column  date_of_birth datetime after city ;
+
+ALTER TABLE first_table drop column  Email;
+
+ALTER TABLE first_table change column  LastName Nick_Name  varchar(255) ;
+
+
+Drop:
+*****
+
+Drop database siva;
+
+Drop table demo_table;
+
+drop procedure procedurename;
+
+drop user 'siva_demo'@'localhost';
+
+
+Truncate:(format)
+*********
+
+truncate table tablename;
+
+
+Rename:
+*******
+rename table old_tablename to new_tablename;
+
+
+Comment:
+********
+
+alter table first_table add column `distance` int(11)  COMMENT 'the employee home to office distance';
+
+
+
+Additional:
+************
+show create table table_name\G
+
+create table business like first_table;
+
+insert into business select * from first_table;
+
+
+								*****************************************************
+
+
+
+
+
+
+
+
+DML - Data Manipulation Language
+********************************
+
+
+Insert:
+*******
+
+insert into first_table select * from business;
+
+insert into first_table select * from business where Age=27;
+
+insert into first_table(nick_name,FirstName,Age,Salary,pf_amount,city) values ('demo_user','siva','27','60000','2800','Brazil'),('demo_user_1','siva','27','60000','2800','Brazil'),('demo_user_2','Raj','27','60000','2800','noida'),('demo_user_3','Anu','27','60500','3800','noida'),('demo_user_4','Anu','27','60500','3800','brazil');     
+
+insert into first_table values (14,'demo_user','siva','27','60000','2800','Brazil','2022-01-01 00:00:00','100');
+
+
+Update:
+*******
+
+update first_table set salary=2000000 where nick_name='pradeep';
+
+update first_table set distance=200 ;
+
+update first_table set salary=salary+1000 where nick_name='pradeep';
+
+update first_table set salary=salary+1050; 
+
+
+Delete:
+*******
+
+delete from first_table;
+
+delete from first_table where nick_name='pradeep';
+delete from first_table where nick_name in('pradeep','siva');
+
+Lock:
+*****
+lock table first_table write;
+lock table first_table read;
+
+CALL:
+*****
+
+call procedurename();
+
+
+Explain:
+*******
+
+explain select * from first_table where nick_name='siva' and age='27';
+
+
+						*************************************************
+
+						
+						
+						
+
+						
+						
+						
+						
+						
+DCL 
+********************************						
+						
+login as: centos
+Authenticating with public key "imported-openssh-key"
+Last login: Sat Mar 12 05:16:57 2022 from 103.163.248.107
+[centos@ip-172-31-43-66 ~]$ mysql -u indhu -pAdmin@123
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 659
+Server version: 5.7.37-log MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use indhu_work;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++----------------------+
+| Tables_in_indhu_work |
++----------------------+
+| demo            |
+| employer_table       |
+| indhu_work           |
+| students             |
+| users                |
++----------------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from employess;
+ERROR 1146 (42S02): Table 'indhu_work.employess' doesn't exist
+mysql> select * from users;
++----+-----------+---------------+---------------------+
+| ID | user_name | user_email    | user_created_at     |
++----+-----------+---------------+---------------------+
+|  1 | name1     | name@site.com | 2022-03-09 04:09:07 |
++----+-----------+---------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> create table demo1(
+    -> ID int NOT NULL AUTO_INCREMENT,
+    -> first_name VARCHAR(255) NOT NULL,
+    -> income int(10) NOT NULL,
+    -> pf_amount int(10) NOT NULL,
+    -> performance VARCHAR(255) NOT NULL,
+    -> PRIMARY KEY(ID)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> desc demo1;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| ID          | int(11)      | NO   | PRI | NULL    | auto_increment |
+| first_name  | varchar(255) | NO   |     | NULL    |                |
+| income      | int(10)      | NO   |     | NULL    |                |
+| pf_amount   | int(10)      | NO   |     | NULL    |                |
+| performance | varchar(255) | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> insert into demo1 (first_name,income,pf_amount,performance) VALUES('nithish','60000','1000','average');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into demo1 (first_name,income,pf_amount,performance) VALUES('gideon','45000','500','good') , ('bens','70000','3000','excellent');
+Query OK, 2 rows affected (0.01 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> insert into demo1 (first_name,income,pf_amount,performance) VALUES('divas','650000','2500','good');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into demo1 (first_name,income,pf_amount,performance) VALUES('diwan','45000','1000','nothing_to_complaint');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from demo1;
++----+------------+--------+-----------+----------------------+
+| ID | first_name | income | pf_amount | performance          |
++----+------------+--------+-----------+----------------------+
+|  1 | nithish    |  60000 |      1000 | average              |
+|  2 | gideon     |  45000 |       500 | good                 |
+|  3 | bens       |  70000 |      3000 | excellent            |
+|  4 | divas      | 650000 |      2500 | good                 |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint |
++----+------------+--------+-----------+----------------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from demo1 limit 3;
++----+------------+--------+-----------+-------------+
+| ID | first_name | income | pf_amount | performance |
++----+------------+--------+-----------+-------------+
+|  1 | nithish    |  60000 |      1000 | average     |
+|  2 | gideon     |  45000 |       500 | good        |
+|  3 | bens       |  70000 |      3000 | excellent   |
++----+------------+--------+-----------+-------------+
+3 rows in set (0.00 sec)
+
+mysql> select min(income) from demo1;
++-------------+
+| min(income) |
++-------------+
+|       45000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select max(income) from demo1;
++-------------+
+| max(income) |
++-------------+
+|      650000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select sum(income) from demo1;
++-------------+
+| sum(income) |
++-------------+
+|      870000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select avg(income) from demo1;
++-------------+
+| avg(income) |
++-------------+
+| 174000.0000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> alter table demo1 add column city VARCHAR(255);
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table demo1 add column age int(10);
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> select * from demo1;
++----+------------+--------+-----------+----------------------+------+------+
+| ID | first_name | income | pf_amount | performance          | city | age  |
++----+------------+--------+-----------+----------------------+------+------+
+|  1 | nithish    |  60000 |      1000 | average              | NULL | NULL |
+|  2 | gideon     |  45000 |       500 | good                 | NULL | NULL |
+|  3 | bens       |  70000 |      3000 | excellent            | NULL | NULL |
+|  4 | divas      | 650000 |      2500 | good                 | NULL | NULL |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL | NULL |
++----+------------+--------+-----------+----------------------+------+------+
+5 rows in set (0.00 sec)
+
+mysql> update demo1 set city ='chennai' where city='null';
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+mysql> update demo1 set age = 25 where age='null' and ID='4';
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+
+mysql> select * from demo1;
++----+------------+--------+-----------+----------------------+------+------+
+| ID | first_name | income | pf_amount | performance          | city | age  |
++----+------------+--------+-----------+----------------------+------+------+
+|  1 | nithish    |  60000 |      1000 | average              | NULL | NULL |
+|  2 | gideon     |  45000 |       500 | good                 | NULL | NULL |
+|  3 | bens       |  70000 |      3000 | excellent            | NULL | NULL |
+|  4 | divas      | 650000 |      2500 | good                 | NULL | NULL |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL | NULL |
++----+------------+--------+-----------+----------------------+------+------+
+5 rows in set (0.00 sec)
+
+mysql> select first_name,city from demo1 where income between '45000' and '60000';
++------------+------+
+| first_name | city |
++------------+------+
+| nithish    | NULL |
+| gideon     | NULL |
+| diwan      | NULL |
++------------+------+
+3 rows in set (0.00 sec)
+
+mysql> select first_name,sum(income) from demo1 group by first_name;
++------------+-------------+
+| first_name | sum(income) |
++------------+-------------+
+| bens       |       70000 |
+| divas      |      650000 |
+| diwan      |       45000 |
+| gideon     |       45000 |
+| nithish    |       60000 |
++------------+-------------+
+5 rows in set (0.00 sec)
+update demo1 set age=25 where age is null;
+mysql> +----+------------+--------+-----------+----------------------+---------+------+
+    -> | ID | first_name | income | pf_amount | performance          | city    | age  |
+    -> +----+------------+--------+-----------+----------------------+---------+------+
+    -> |  1 | nithish    |  60000 |      1000 | average              | NULL    |   25 |
+    -> |  2 | gideon     |  45000 |       500 | good                 | NULL    |   25 |
+    -> |  3 | bens       |  70000 |      3000 | excellent            | chennai |   25 |
+    -> |  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL    |   25 |
+    -> +----+------------+--------+-----------+----------------------+---------+------+
+
+mysql> update demo1 set city='chennai' where city is null and first_name='bens';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from demo1;
++----+------------+--------+-----------+----------------------+---------+------+
+| ID | first_name | income | pf_amount | performance          | city    | age  |
++----+------------+--------+-----------+----------------------+---------+------+
+|  1 | nithish    |  60000 |      1000 | average              | NULL    | NULL |
+|  2 | gideon     |  45000 |       500 | good                 | NULL    | NULL |
+|  3 | bens       |  70000 |      3000 | excellent            | chennai | NULL |
+|  4 | divas      | 650000 |      2500 | good                 | NULL    | NULL |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL    | NULL |
++----+------------+--------+-----------+----------------------+---------+------+
+5 rows in set (0.00 sec)
+
+mysql> select * from demo1 where first_name like '%n%';
++----+------------+--------+-----------+----------------------+---------+------+
+| ID | first_name | income | pf_amount | performance          | city    | age  |
++----+------------+--------+-----------+----------------------+---------+------+
+|  1 | nithish    |  60000 |      1000 | average              | NULL    |   25 |
+|  2 | gideon     |  45000 |       500 | good                 | NULL    |   25 |
+|  3 | bens       |  70000 |      3000 | excellent            | chennai |   25 |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL    |   25 |
++----+------------+--------+-----------+----------------------+---------+------+
+
+mysql> select * from demo1 where first_name like '%n';
++----+------------+--------+-----------+----------------------+------+------+
+| ID | first_name | income | pf_amount | performance          | city | age  |
++----+------------+--------+-----------+----------------------+------+------+
+|  2 | gideon     |  45000 |       500 | good                 | NULL |   25 |
+|  5 | diwan      |  45000 |      1000 | nothing_to_complaint | NULL |   25 |
++----+------------+--------+-----------+----------------------+------+------+
+2 rows in set (0.00 sec)
+
+mysql> select * from demo1 where city='chennai' and first_name like 'b%';
++----+------------+--------+-----------+-------------+---------+------+
+| ID | first_name | income | pf_amount | performance | city    | age  |
++----+------------+--------+-----------+-------------+---------+------+
+|  3 | bens       |  70000 |      3000 | excellent   | chennai |   25 |
++----+------------+--------+-----------+-------------+---------+------+
+1 row in set (0.00 sec)
+mysql> select first_name,income from demo1 where pf_amount between '500' and '3000';
++------------+--------+
+| first_name | income |
++------------+--------+
+| nithish    |  60000 |
+| gideon     |  45000 |
+| bens       |  70000 |
+| divas      | 650000 |
+| diwan      |  45000 |
++------------+--------+
+5 rows in set (0.00 sec)
+
+mysql> use demo;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> grant insert on demo.* to 'indhu_demo'@'localhost';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> show grants for 'indhu_demo'@'localhost';
++--------------------------------------------------------------+
+| Grants for indhu_demo@localhost                              |
++--------------------------------------------------------------+
+| GRANT USAGE ON *.* TO 'indhu_demo'@'localhost'               |
+| GRANT SELECT, INSERT ON `demo`.* TO 'indhu_demo'@'localhost' |
++--------------------------------------------------------------+
+2 rows in set (0.00 sec)
+
+mysql> revoke insert on demo.* from 'indhu_demo'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show grants for 'indhu_demo'@'localhost';
++------------------------------------------------------+
+| Grants for indhu_demo@localhost                      |
++------------------------------------------------------+
+| GRANT USAGE ON *.* TO 'indhu_demo'@'localhost'       |
+| GRANT SELECT ON `demo`.* TO 'indhu_demo'@'localhost' |
++------------------------------------------------------+
+2 rows in set (0.00 sec)
+
+}
+
+

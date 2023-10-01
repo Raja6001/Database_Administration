@@ -1,0 +1,206 @@
+DELIMITER $$
+CREATE  PROCEDURE PRC_CREDIT_LIMIT_CHECK (
+ IN `P_Customer_Key` Double,
+ OUT `Customer_Balance` Double,
+ OUT `parent_balance` DOUBLE,
+ OUT `parent_child_balance` DOUBLE
+)
+LANGUAGE SQL
+NOT DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
+COMMENT ''
+Begin
+
+Declare Ar_Bal_Amt Double;
+Declare P_Key Double;
+
+Declare Cust_Balance DoUBLE;
+Declare Cust_Balance_Refund DOUBLE;
+
+
+Declare par_balance Double;
+Declare Parent_Child_Bal Double;
+Declare Cust_Key Double;
+
+Declare T_Bal Double;
+Declare T_Bal_Refund Double;
+
+declare child_Customer_Key DOUBLE ;
+DECLARE not_found INT DEFAULT 0;
+declare Credit_limit Double;
+Declare Credit_limit_add Double;
+Declare parent_credit_limit Double;
+declare Parent_Credit_limit_add Double;
+DECLARE Parent_Child_Credit DOUBLE ;
+Declare Par_Child_add_credit Double;
+declare T_credit_Bal Double;
+Declare T_credit_add_Bal Double;
+Declare Ar_Bal_C_Key Double;
+DECLARE C_Key_parr_Key DOUBLE;
+DECLARE Par_Child_Bal_C_Key DOUBLE;
+
+Declare Ar_Bal Cursor For
+SELECT
+ ifnull(SUM(fopd_local_amount),0) FROM v_id_tvl_fop_details WHERE fopd_settle_code="CREDIT" AND fopd_doc_type_key IS NULL
+AND(mvd_voucher_status="S" OR atd_ticket_status="S" OR cvd_voucher_status="S" OR hvd_voucher_status="S") AND fopd_customer_key=Ar_Bal_C_Key;
+
+Declare Ar_Bal_refund Cursor For
+SELECT
+ ifnull(SUM(fopd_local_amount),0) FROM v_id_tvl_fop_details WHERE fopd_settle_code="CREDIT" AND fopd_doc_type_key IS NULL
+AND(mvd_voucher_status="R" OR atd_ticket_status="R" OR cvd_voucher_status="R" OR hvd_voucher_status="R") AND fopd_customer_key=Ar_Bal_C_Key;
+
+
+Declare Par_Key Cursor For
+select customer_parent_key from t_id_cms_master where customer_key=P_Customer_Key;
+
+Declare C_Key Cursor  For
+Select Customer_Key fROM t_id_cms_master WHERE CUSTOMER_PARENT_KEY=C_Key_parr_Key;
+
+Declare Ar_credit cursor for
+select ecst_credit_limit from t_id_tvl_cms_settlement_terms where ecst_customer_key=P_Customer_Key;
+
+Declare Ar_credit_add cursor for
+select ifnull(SUM(ecac_credit_limit),0) from t_id_tvl_cms_addl_credit_limit where ecac_customer_key=P_Customer_Key and active_from <= CURRENT_DATE() and active_to >= CURRENT_DATE();
+
+Declare continue handler for not found set not_found = 1;
+
+Set Ar_Bal_C_Key = P_Customer_Key;
+Open Ar_Bal;
+Fetch Ar_Bal Into Cust_Balance;
+Close Ar_Bal;
+-- INSERT INTO test1 (id ,`amount`) VALUES(1.11,Cust_Balance);
+
+SET Cust_Balance_Refund = 0;
+Open Ar_Bal_refund;
+Fetch Ar_Bal_refund Into Cust_Balance_Refund;
+Close Ar_Bal_refund;
+
+SET Cust_Balance = IFNULL(Cust_Balance,0) - IFNULL(Cust_Balance_Refund,0);
+
+open Ar_credit;
+FETCH Ar_credit INTO Credit_limit;
+close Ar_credit;
+-- INSERT INTO test1 (id ,`amount`) VALUES(1.12,Credit_limit);
+
+OPEN Ar_credit_add;
+FETCH Ar_credit_add INTO Credit_limit_add;
+CLOSE Ar_credit_add;
+-- INSERT INTO test1 (id ,`amount`) VALUES(1.13,ifnull(Credit_limit_add,0));
+
+Set not_found = 0;
+SET Ar_Bal_C_Key = P_Customer_Key;
+Open Par_Key;
+Fetch Par_Key Into P_Key;
+Close Par_Key;
+-- INSERT INTO test1 (id,`amount`) VALUES(2.10,P_Key);
+
+IF P_Key IS NOT NULL  AND P_Key <>0 THEN
+Set Ar_Bal_C_Key = P_Key;
+Set not_found = 0;
+Open Ar_Bal;
+Fetch Ar_Bal Into par_balance;
+Close Ar_Bal;
+-- INSERT INTO test1 (id,`amount`) VALUES(2.11,par_balance);
+
+SET P_Customer_Key = P_Key;
+OPEN Ar_credit;
+FETCH Ar_credit INTO parent_credit_limit;
+CLOSE Ar_credit;
+-- INSERT INTO test1 (id,`amount`) VALUES(2.12,parent_credit_limit);
+
+SET P_Customer_Key = P_Key;
+OPEN Ar_credit_add;
+FETCH Ar_credit_add INTO Parent_Credit_limit_add;
+CLOSE Ar_credit_add;
+-- INSERT INTO test1 (id,`amount`) VALUES(2.13,ifnull(Parent_Credit_limit_add,0));
+
+SET C_Key_parr_Key = P_Key;
+-- INSERT INTO test1 (id,`amount`) VALUES(2.14,C_Key_parr_Key);
+
+SET not_found=0;
+open C_Key;
+cur_project_loop: LOOP
+  fetch from C_Key into child_Customer_Key;
+  -- INSERT INTO test1 (id,`amount`) VALUES(3.11,child_Customer_Key);
+  if not_found = 0 then
+    SET Customer_Balance=0;
+    SET parent_balance=0;
+    SET parent_child_balance=0;
+    begin
+    BLOCK1:begin
+    DECLARE Par_Child_Bal
+     CURSOR FOR
+      SELECT  ifnull(SUM(fopd_local_amount),0) FROM v_id_tvl_fop_details WHERE fopd_settle_code="CREDIT" AND fopd_doc_type_key IS NULL
+       AND(mvd_voucher_status="S" OR atd_ticket_status="S" OR cvd_voucher_status="S" OR hvd_voucher_status="S")
+    AND fopd_customer_key=Par_Child_Bal_C_Key;
+    DECLARE Par_Child_Bal_Refund
+     CURSOR FOR
+      SELECT  ifnull(SUM(fopd_local_amount),0) FROM v_id_tvl_fop_details WHERE fopd_settle_code="CREDIT" AND fopd_doc_type_key IS NULL
+       AND(mvd_voucher_status = "R" OR atd_ticket_status = "R" OR cvd_voucher_status = "R" OR hvd_voucher_status = "R")
+    AND fopd_customer_key = Par_Child_Bal_C_Key;
+       
+     SET Par_Child_Bal_C_Key = child_Customer_Key;
+  
+     Open Par_Child_Bal;
+     Fetch Par_Child_Bal Into T_Bal;
+     Close Par_Child_Bal;
+  
+     SET T_Bal_Refund = 0;
+     Open Par_Child_Bal_Refund;
+     Fetch Par_Child_Bal_Refund Into T_Bal_Refund;
+     Close Par_Child_Bal_Refund;     
+     -- INSERT INTO test1 (id,`amount`) VALUES(5.11,T_Bal);  
+ 
+     SET Parent_Child_Bal = ifnull(Parent_Child_Bal,0) + IFNULL(T_Bal,0) - IFNULL(T_Bal_Refund,0) ;
+     -- INSERT INTO test1 (id,`amount`) VALUES(5.12,Parent_Child_Bal);
+
+    END BLOCK1;
+    BLOCK2:BEGIN
+    DECLARE Par_Child_crdit
+     CURSOR FOR
+      SELECT ifnull(SUM(ecst_credit_limit),0) FROM t_id_tvl_cms_settlement_terms WHERE  ecst_customer_key =Par_Child_Bal_C_Key;
+      SET Par_Child_Bal_C_Key=child_Customer_Key;
+      Open Par_Child_crdit;
+      fetch Par_Child_crdit into T_credit_Bal;
+      -- INSERT INTO test1 (id,`amount`) VALUES(6.11,T_credit_Bal);
+      set Parent_Child_Credit=ifnull(Parent_Child_Credit,0)+ifnull(T_credit_Bal,0);
+      -- INSERT INTO test1 (id,`amount`) VALUES(6.12,Parent_Child_Credit);
+      Close Par_Child_crdit;
+    END BLOCK2;
+    BLOCK3:BEGIN
+     DECLARE Par_Child_add_credit
+      CURSOR FOR
+       SELECT ifnull(SUM(ecac_credit_limit),0) FROM t_id_tvl_cms_addl_credit_limit WHERE ecac_customer_key=Par_Child_Bal_C_Key  and active_from <=       CURRENT_DATE() and active_to >= CURRENT_DATE();
+      SET Par_Child_Bal_C_Key=child_Customer_Key;
+      OPEN Par_Child_add_credit;
+      FETCH Par_Child_add_credit INTO T_credit_add_Bal;
+      -- INSERT INTO test1 (id,`amount`) VALUES(7.11,T_credit_add_Bal);
+      SET Par_Child_add_credit=IFNULL(Par_Child_add_credit,0)+IFNULL(T_credit_add_Bal,0);
+      -- INSERT INTO test1 (id,`amount`) VALUES(7.12,Par_Child_add_credit);
+     CLOSE Par_Child_add_credit;
+    END BLOCK3;
+ END;
+ iterate cur_project_loop;
+ CLOSE C_Key;
+else
+leave  cur_project_loop;
+END IF;
+END LOOP cur_project_loop;
+
+Set Customer_Balance=(ifnull(Credit_limit,0) + ifnull(Credit_limit_add,0))- ifnull(Cust_Balance,0);
+SET parent_balance=(IFNULL(parent_credit_limit,0) + IFNULL(Parent_Credit_limit_add,0))- IFNULL(par_balance,0);
+-- SET parent_child_balance=(IFNULL(Parent_Child_Credit,0) + IFNULL(Par_Child_add_credit,0))- IFNULL(Parent_Child_Bal,0);
+SET parent_child_balance = IFNULL(Parent_Child_Bal,0);
+END IF; /* P_Key Is not null checking.. */
+
+IF P_Key IS NULL then
+SET Customer_Balance=(IFNULL(Credit_limit,0) + IFNULL(Credit_limit_add,0))- IFNULL(Cust_Balance,0);
+SET parent_balance=(IFNULL(parent_credit_limit,0) + IFNULL(Parent_Credit_limit_add,0))- IFNULL(par_balance,0);
+--  SET parent_child_balance=(IFNULL(Parent_Child_Credit,0) + IFNULL(Par_Child_add_credit,0))- IFNULL(Parent_Child_Bal,0);
+SET parent_child_balance =  IFNULL(Parent_Child_Bal,0);
+end if;
+END;
+$$
+
+DELIMITER ;
